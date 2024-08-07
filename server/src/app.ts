@@ -1,28 +1,24 @@
 import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
-
-import * as middlewares from './middlewares'
+import { unknowEndpoint } from './middlewares/unknow.endpoint'
 import api from './api'
-import type MessageResponse from './interfaces/MessageResponse'
+import { requestLogger } from './utils/logger.request'
 
-require('dotenv').config()
-
+// Init the app
 const app = express()
 
+// Middlewares befores routes
 app.use(helmet())
 app.use(cors())
 app.use(express.json())
+app.use(requestLogger)
+app.use(express.static('public'))
 
-app.get<{}, MessageResponse>('/', (_, res) => {
-	res.json({
-		message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄',
-	})
-})
-
+// Routes
 app.use('/api/v1', api)
 
-app.use(middlewares.notFound)
-app.use(middlewares.errorHandler)
+// Middlewares after routes
+app.use(unknowEndpoint)
 
 export default app
